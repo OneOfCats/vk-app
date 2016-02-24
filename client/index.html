@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html ng-app="friendsSearchApp">
+	<head>
+	  <meta charset="utf-8">
+	  <title>Find your friend</title>
+	  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+	  <script src="app.js"></script>
+	  <script src="components/customSelect/customSelect.js"></script>
+	  <script src="components/vkDataExchange/vkDataExchange.js"></script>
+	</head>
+
+	<body>
+	  <div ng-controller="friendsAppCtrl as ctrl">
+		<div>
+	  		Debug:
+	  		{{ctrl.country.title}}
+	  	</div>
+
+	  	<div>
+	  		Ваш vk id:
+	  		<input type="text" ng-model="ctrl.userVkId" ng-change="ctrl.findUserPublics()">
+	  	</div>
+	  	
+		<div>
+			Выберите паблики:
+		  	<div ng-repeat="public in ctrl.userPublics">
+		  		<input type="checkbox" ng-click="ctrl.addSelectedPublic($index)"> {{public.name}} {{public.dbSubscribers.items.length}}
+		  	</div>
+		</div>
+	  	
+		<div>
+			Выбранные паблики:
+		  	<ul>
+		  		<li ng-repeat="public in ctrl.publicsForSearch">
+		  			{{public.name}}
+		  			<div ng-show="public.subscribers">
+		  				{{public.subscribers.loaded}} / {{public.subscribers.total}}. 
+		  			</div>
+		  		</li>
+		  	</ul>
+		</div>
+
+		<div>
+			<button ng-click="ctrl.findSubscribers()">Найти подписчиков</button>
+		</div>
+		
+		<custom-select from="ctrl.countriesList" to="ctrl.country"></custom-select>
+		<input type="text" ng-model="ctrl.cityInput" ng-change="ctrl.getCities(ctrl.cityInput)">
+		<custom-select from="ctrl.citiesList" to="ctrl.city"></custom-select>
+		Пол:
+		<label><input type="radio" ng-model="ctrl.sex" ng-value="1">Женский</label>
+		<label><input type="radio" ng-model="ctrl.sex" ng-value="2">Мужской</label>
+		<label><input type="radio" ng-model="ctrl.sex" ng-value="0">Любой</label>
+
+		<div ng-show="ctrl.commonSubscribers.length != 0">
+			Найденные общие подписчики:
+			<div>
+				<ul>
+					<li ng-repeat="subscriber in ctrl.commonSubscribers | locationFilter:ctrl.country.id:ctrl.city.id:ctrl.sex track by $index">
+						<a href="http://vk.com/id{{subscriber.id}}">{{subscriber.first_name}} {{subscriber.last_name}}</a><span ng-show="subscriber.undefinedPlace">Местоположение неизвестно</span>
+					</li>
+				</ul>
+			</div>
+			Пользователи с неизвестным точным расположением:
+			<div>
+				<ul>
+					<li ng-repeat="subscriber in ctrl.commonSubscribers | undefinedPlaceFilter:ctrl.sex track by $index">
+						<a href="http://vk.com/id{{subscriber.id}}">{{subscriber.first_name}} {{subscriber.last_name}}</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	  	
+	  </div>
+	  <script src="//vk.com/js/api/openapi.js" type="text/javascript"></script>
+	  <script type="text/javascript">
+	    VK.init({
+	      apiId: 5225238
+	    });
+	  </script>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+<div ng-click="active = !active">
+	{{to.title || 'Not selected'}}
+	<div ng-show="active">
+		<div ng-repeat="country in from track by $index" ng-click="changeCountry($index)">
+			{{country.title}}
+		</div>
+	</div>
+</div>

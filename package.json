@@ -1,0 +1,11 @@
+{
+  "name"         : "friend-search",
+  "version"      : "0.0.0",
+  "description"  : "Vk application.",
+  "main"         : "server.js",
+  "dependencies" : {
+    "express"    : "~4.7.2",
+    "body-parser": "~1.5.2",
+    "method-override": "~2.1.2"
+    }
+}
