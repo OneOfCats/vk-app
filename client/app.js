@@ -1,6 +1,6 @@
 var app = angular.module('friendsSearchApp', []);
 
-app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', function($scope, vkDataExchange, $q){
+app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', function($scope, vkDataExchange, $q, $http){
   var self = this;
 
   self.userVkId = 0; //user's vk id
@@ -64,7 +64,11 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', function($sc
   });
 
   self.findUserPublics = function findUserPublics(){
-    var downloadedPromise = vkDataExchange.getPublics(self.userVkId, self.userPublics);
+    var Publics = [];
+    var downloadedPromise = vkDataExchange.getPublics(self.userVkId, Publics);
+    downloadedPromise.promise.then(function(){
+      self.userPublics = Publics;
+    });
   };
 
   self.addSelectedPublic = function addSelectedPublic(index){
@@ -74,6 +78,15 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', function($sc
       self.publicsForSearch.splice(i, 1); //If found - it means checkbox is pressed again (unchecked), so delete this public
       return;
     }
+
+    $http.get('/publics/' + public.id + '/updated') //Get the date when subscribers DB was updated last time
+      .success(function(data){
+        public.updated = new Date(data);
+      })
+      .error(function(data){
+        console.log('HTTP get public update date error: ' + data);
+      });
+
     self.publicsForSearch.push(public);
   };
 
@@ -84,14 +97,37 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', function($sc
     function loadSubscribers(index){ //takes public index in search publics array
       if(self.publicsForSearch[index] === undefined){ //Get common subscribers and exit if all publics have been searched
         self.commonSubscribers = self.getCommonSubscribers();
-        return;
-      }else if(self.publicsForSearch[index].subscribers !== undefined){ //Go to the next public if we already have this public's subscribers
-      loadSubscribers(++index);
-      }else{ //or load subscribers
+      }
+      else if(self.publicsForSearch[index].subscribers !== undefined){ //Go to the next public if we already have this public's subscribers
+        loadSubscribers(++index);
+      }
+      else if(self.publicsForSearch[index].getFromDb == true){ //If user want to download subscribers fast from DB
+        $http.get('/publics/' + self.publicsForSearch[index].id + '/subscribers')
+          .success(function(data){
+            self.publicsForSearch[index].subscribers = {};
+            self.publicsForSearch[index].subscribers.items = data;
+            self.publicsForSearch[index].updated = new Date();
+            loadSubscribers(++index);
+          })
+          .error(function(data){
+            console.log('HTTP get public subscribers error: ' + data);
+            loadSubscribers(++index);
+          });
+      }
+      else{ //or load subscribers from VK
         self.publicsForSearch[index].subscribers = {loaded: 0, total: 0, items: new Array(), totalLoad: $q.defer()};
         loadNext1000Func(index, 0);
-        self.publicsForSearch[index].subscribers.totalLoad.promise.then(function(){
+        self.publicsForSearch[index].subscribers.totalLoad.promise.then(function(){ //When all subscribers of this public are downloaded
           self.publicsForSearch[index].updated = new Date();
+          delete self.publicsForSearch[index].totalLoad;
+          delete self.publicsForSearch[index].load1000;
+          $http.post('/publics/' + self.publicsForSearch[index].id + '/subscribers', self.publicsForSearch[index]) //Send subscribers to the server
+            .success(function(data){
+              console.log('Public ' + data + ' is downloaded to DB');
+            })
+            .error(function(data){
+              console.log('HTTP post public ' + data + ' download to DB error: ' + data);
+            });
           loadSubscribers(++index);
         });
       }

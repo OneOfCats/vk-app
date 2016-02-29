@@ -36,6 +36,9 @@
 		  			<div ng-show="public.subscribers">
 		  				{{public.subscribers.loaded}} / {{public.subscribers.total}}. 
 		  			</div>
+		  			<div ng-show="public.updated > 0">
+		  				<input type="checkbox" ng-model="public.getFromDb"> Взять подписчиков из базы (быстрее). Последнее обновление базы: {{public.updated | date : "d/M/yy H:mm"}}
+		  			</div>
 		  		</li>
 		  	</ul>
 		</div>
