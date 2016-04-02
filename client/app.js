@@ -106,6 +106,18 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
           .success(function(data){
             self.publicsForSearch[index].subscribers = {};
             self.publicsForSearch[index].subscribers.items = data;
+            for(var i = 0; i < self.publicsForSearch[index].subscribers.items.length; i++){
+              if(self.publicsForSearch[index].subscribers.items[i].country != 'undefined'){
+                self.publicsForSearch[index].subscribers.items[i].country = JSON.parse(self.publicsForSearch[index].subscribers.items[i].country);
+              }else{
+                self.publicsForSearch[index].subscribers.items[i].country = undefined;
+              }
+              if(self.publicsForSearch[index].subscribers.items[i].city != 'undefined'){
+                self.publicsForSearch[index].subscribers.items[i].city = JSON.parse(self.publicsForSearch[index].subscribers.items[i].city);
+              }else{
+                self.publicsForSearch[index].subscribers.items[i].city = undefined;
+              }
+            }
             self.publicsForSearch[index].updated = new Date();
             loadSubscribers(++index);
           })
