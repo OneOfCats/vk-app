@@ -38,8 +38,10 @@ function succesfullConnect(){
 	console.log('Created server');
 
 	app.get('/publics/:publicId/updated', function(req, res){
+		console.log('Getting update time 1');
 		db.get().pool.query('SELECT update_time FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = \'' + db.get().db_name + '\' AND table_name = \'subscribers_' + req.params.publicId + '\'', function(err, result){
 			if(err) return res.end(err);
+			console.log('Getting update time 2');
 			if(result.length == 0){ //If public not found
 				res.writeHead(204, {'Content-Type' : 'x-text/plain'});
 				return res.end();
@@ -66,6 +68,19 @@ function succesfullConnect(){
 				res.write(result[0].update_time.toString());
 				return res.end();
 			}
+		});
+	});
+
+	app.get('/publics/:publicId/exists', function(req, res){
+		db.get().pool.query('SELECT 1 FROM subscribers_' + req.params.publicId + ' LIMIT 1', function(err, result){
+			if(err){
+				console.log('Public ' + req.params.publicId + ' not found');
+				res.writeHead(204, {'Content-Type' : 'x-text/plain'});
+				return res.end();
+			}
+			console.log('Public ' + req.params.publicId + ' found');
+			res.writeHead(200, {'Content-Type' : 'x-text/plain'});
+			return res.end();
 		});
 	});
 
@@ -96,24 +111,10 @@ function succesfullConnect(){
 					console.log(err);
 					return err;
 				}
-				db.insertSubscribers(req.body.subscribers.items, 'new_subscribers_' + req.params.publicId, function(err){
+				db.insertSubscribers(req.body.subscribers.items, 'subscribers_' + req.params.publicId, function(err){
 					if(err){
 						console.log(err);
 						return err;
-					}
-					if(result.length != 0){
-						db.get().pool.query('DROP TABLE subscribers_' + req.params.publicId, function(err){
-							if(err) return res.end(err.toString());
-							db.get().pool.query('RENAME TABLE new_subscribers_' + req.params.publicId + ' TO subscribers_' + req.params.publicId, function(err){
-								console.log(err);
-								if(err) return err;
-							});
-						});
-					}else{
-						db.get().pool.query('RENAME TABLE new_subscribers_' + req.params.publicId + ' TO subscribers_' + req.params.publicId, function(err){
-							console.log(err);
-							if(err) return err;
-						});
 					}
 				});
 			});

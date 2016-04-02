@@ -78,7 +78,6 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
       self.publicsForSearch.splice(i, 1); //If found - it means checkbox is pressed again (unchecked), so delete this public
       return;
     }
-
     $http.get('/publics/' + public.id + '/updated') //Get the date when subscribers DB was updated last time
       .success(function(data){
         public.updated = new Date(data);
@@ -86,7 +85,6 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
       .error(function(data){
         console.log('HTTP get public update date error: ' + data);
       });
-
     self.publicsForSearch.push(public);
   };
 
