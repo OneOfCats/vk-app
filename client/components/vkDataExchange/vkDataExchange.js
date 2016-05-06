@@ -28,7 +28,7 @@ app.factory('vkDataExchange', function($timeout, $q){
   };
 
   self.get1000Subscribers = function get1000Subscribers(publicId, subscribersObj){
-    return VK.Api.call('groups.getMembers', {group_id: publicId, offset: subscribersObj.loaded, fields: 'sex, city, country, photo_200', v: 5.44}, function(r){
+    return VK.Api.call('groups.getMembers', {group_id: publicId, offset: subscribersObj.loaded, fields: 'sex, city, country, photo_100', v: 5.44}, function(r){
         if(!r || !r.response){ //If error
           subscribersObj.load1000.reject('no-response');
           return; 

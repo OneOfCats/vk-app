@@ -1,8 +1,8 @@
-<div ng-click="active = !active">
+<div ng-click="active = !active" class="custom-select" ng-class="{helper: ctrl.depending!==undefined}">
 	{{to.title || 'Not selected'}}
-	<div ng-show="active">
-		<div ng-repeat="country in from track by $index" ng-click="changeCountry($index)">
-			{{country.title}}
+	<div ng-show="active" class="custom-select-list">
+		<div ng-repeat="item in from track by $index" ng-click="changeItem($index)" class="custom-select-list-item">
+			{{item.title}}
 		</div>
 	</div>
 </div>

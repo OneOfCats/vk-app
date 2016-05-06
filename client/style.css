@@ -1,1 +1,331 @@
 /* CSS declarations go here */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+margin: 0;
+padding: 0;
+border: 0;
+font-size: 100%;
+font: inherit;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, main {
+display: block;
+}
+body {
+line-height: 1;
+}
+ol, ul {
+list-style: none;
+}
+blockquote, q {
+quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+content: '';
+content: none;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+.clearfix {
+    display: inline-block;
+}
+html[xmlns] .clearfix {
+    display: block;
+}
+a{
+	cursor: pointer;
+	text-decoration: none;
+}
+a:hover{
+	text-decoration: underline;
+}
+input[type="submit"]{
+	cursor: pointer;
+}
+body{
+	font-family: Tahoma;
+}
+ul{
+	padding: 0;
+	margin: 0;
+}
+
+.wrapper{
+	width: 800px;
+	margin: 40px auto 0;
+}
+.window{
+	border: 7px solid #624d7c;
+	border-top: none;
+}
+.window.no_border{
+	border-bottom: none;
+}
+.header{
+	background: #624d7c;
+	padding: 10px 0 10px 13px;
+	color: white;
+	line-height: 21px;
+	height: 21px;
+	font-size: 15px;
+	overflow: hidden;
+}
+.header select, .header input[type="text"], .custom-select{
+	display: inline-block;
+	width: 130px;
+	padding: 0 6px;
+	background: white;
+	border: none;
+	color: #b9b9b9;
+	margin: 0 8px;
+	height: 23px;
+	cursor: pointer;
+	vertical-align: top;
+}
+.custom-select-list{
+	position: absolute;
+	z-index: 1;
+	background: white;
+	width: 142px;
+	margin-left: -6px;
+}
+.custom-select-list-item{
+	padding: 0 6px;
+	height: 23px;
+	line-height: 23px;
+}
+.custom-select-list-item:hover{
+	background: rgba(0, 0, 0, 0.1);
+}
+.header .item{
+	margin-right: 14px;
+	float: left;
+	transition: opacity 1s ease;
+	opacity: 1;
+}
+.header .item.full {
+	width: 100%;
+}
+.header .item.bordered{
+	margin-right: 9px;
+	border-right: 1px solid white;
+}
+.header .item.bordered input{
+	width: 100px;
+}
+.header .container{
+	float: right;
+	transition: opacity 1s ease;
+	opacity: 1;
+	width: 75%;
+	height: 50px;
+}
+.header .container.collapsedFast{
+	display: none;
+}
+.header .container.collapsed{
+	opacity: 0;
+}
+.header .item.small .custom-select{
+	width: 40px;
+	text-align: center;
+	margin-right: 0;
+}
+.header .item.small .custom-select-list{
+	width: 46px;
+	padding: 0 3px;
+}
+.header .item.last{
+	float: right;
+	margin-right: 0;
+}
+.header .item.collapsed {
+	opacity: 0;
+	display: none;
+}
+
+.additional{
+	height: 46px;
+	line-height: 46px;
+	text-align: center;
+	padding: 4px 0;
+	border-top: 1px solid #d1d1d1;
+}
+.additional span{
+	font-size: 15px;
+	color: #8a8a8a;
+}
+.additional *{
+	vertical-align: top;
+}
+.uncheck{
+	display: inline-block;
+	width: 46px;
+	height: 46px;
+	background: url(img/uncheck.jpg);
+	margin-right: 24px;
+}
+.additional button{
+	display: inline-block;
+	width: 166px;
+	height: 46px;
+	line-height: 44px;
+	border-radius: 30px;
+	color: white;
+	text-align: center;
+	font-size: 20px;
+	background: #624d7c;
+	border: none;
+	cursor: pointer;
+}
+.additional button:hover{
+	background: #6b5a8c;
+}
+.main{
+	overflow: hidden;
+	height: 690px;
+	transition: height 1s ease;
+}
+.main.collapsed{
+	height: 0;
+}
+.main .left{
+	padding: 23px 0 0 0;
+	overflow: hidden;
+	opacity: 1;
+	transition: opacity 1s ease;
+}
+.main .left.collapsed{
+	opacity: 0;
+}
+.main .right{
+	float: right;
+	padding: 23px 13px 0 13px;
+	border-left: 8px solid #5d4e7a;
+	width: 33%;
+}
+.main .left .additional{
+	margin: 0 13px;
+}
+.content{
+	height: 612px;
+}
+.main .plate .item{
+	display: inline-block;
+	vertical-align: top;
+	text-decoration: none;
+	font-size: 18px;
+	color: #848484;
+	padding: 23px 0 46px 12px;
+	width: 140px;
+	text-align: center;
+}
+.main .plate .item img{
+	max-width: 100%;
+	margin-bottom: 7px;
+	transition: height 0.2s ease;
+}
+.main .list .item{
+	display: block;
+	margin-bottom: 16px;
+	border-bottom: 1px solid #d1d1d1;
+	text-decoration: none;
+	overflow: hidden;
+	font-size: 14px;
+	color: #727272;
+	padding: 0 6px 16px;
+	cursor: pointer;
+}
+.main .list .item div{
+	display: table-cell;
+	vertical-align: middle;
+	height: 50px;
+}
+.main .plate .item:hover, .main .list .item:hover{
+	color: #5d4e7a;
+}
+.main .list .item span{
+	display: block;
+	color: #b9b9b9;
+	font-size: 14px;
+	line-height: 14px;
+}
+.main .list .item img{
+	float: left;
+	margin-right: 20px;
+	max-width: 50px;
+}
+.main .list .item input[type="checkbox"]{
+	display: none;
+}
+.main .list .item input[type="checkbox"]:checked + div{
+	font-weight: bold;
+	text-decoration: underline;
+	color: #5d4e7a;
+}
+
+.main .item.unknown:before {
+	display: block;
+	content: "";
+	position: absolute;
+	width: 150px;
+	height: 200px;
+	background: rgba(255, 255, 255, 0.5);
+}
+
+button[disabled="disabled"]{
+	background: #836eac;
+}
+button[disabled="disabled"]:hover, button[disabled="disabled"]:active{
+	background: #836eac;
+}
+
+input[type="text"].helper{
+	margin: -23px 0px 0 51px;
+    display: block;
+    position: relative;
+}
+
+.loading {
+	display: inline-block;
+	margin: 4px 0 0 10px;
+	background: white;
+	height: 6px;
+	transition: width 0.3s ease;
+}
+.loading-wrapper {
+	float: right;
+	width: 51%;
+}
+
+.hidden {
+	display: none;
+}
+
+#debug {
+	display: none;
+}

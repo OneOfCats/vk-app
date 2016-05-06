@@ -1,7 +1,21 @@
-var app = angular.module('friendsSearchApp', []);
+var app = angular.module('friendsSearchApp', ['ngScrollbars']);
 
-app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', function($scope, vkDataExchange, $q, $http){
+app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', '$timeout', function($scope, vkDataExchange, $q, $http, $timeout){
   var self = this;
+
+  self.scrollbarsConfig = {
+      autoHideScrollbar: false,
+      theme: 'vk-friends-search',
+      advanced:{
+        updateOnContentResize: true
+      },
+      mouseWheel:{ 
+        scrollAmount: 50,
+        normalizeDelta: false
+      },
+      scrollInertia: 10
+    }
+  self.genders = [{title: 'Оба'}, {title: 'Ж'}, {title: 'М'}];
 
   self.userVkId = 0; //user's vk id
   self.userPublics = new Array(); //user's publics (subscriptions)
@@ -11,7 +25,18 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
   self.citiesList = [{id: 0, title: 'Любой город'}];
   self.country = self.countriesList[0];
   self.city = self.citiesList[0];
+  self.nowDownloading = -1; //Паблик, подписчиков которого мы загружаем в данный момент (это для индикатора загрузки)
   getCountries();
+
+  self.resetInfo = function resetInfo(){
+    self.countriesList = [{id: 0, title: 'Любая страна'}];
+    self.citiesList = [{id: 0, title: 'Любой город'}];
+    self.country = self.countriesList[0];
+    self.city = self.citiesList[0];
+    self.nowDownloading = -1; //Паблик, подписчиков которого мы загружаем в данный момент (это для индикатора загрузки)
+    self.selectedGender = {title: 'Оба'};
+    getCountries();
+  };
 
   self.getCities = function getCities(cityName){
     console.log('getCities');
@@ -40,6 +65,14 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
     }
   };
 
+  self.uncheckAll = function uncheckAll(){
+    var checkboxes = document.querySelectorAll('.checkboxes input');
+    for(var i = 0; i < checkboxes.length; i++){
+      checkboxes[i].checked = false;
+    }
+    self.publicsForSearch = new Array();
+  };
+
   function getCountries(){
     console.log('getCountries');
     VK.Api.call('database.getCountries', {need_all: 0, count: 5, v: 5.44}, function(r){
@@ -62,6 +95,24 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
       self.getCities(''); //Get cities by country
     }
   });
+
+  $scope.$watch('ctrl.selectedGender', function(current, old){
+    switch(current.title){
+      case 'Оба':{
+        self.sex = 0;
+        break;
+      }
+      case 'Ж':{
+        self.sex = 1;
+        break;
+      }
+      case 'М':{
+        self.sex = 2;
+        break;
+      }
+    }
+  });
+  self.selectedGender = {title: 'Оба'};
 
   self.findUserPublics = function findUserPublics(){
     var Publics = [];
@@ -89,12 +140,15 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
   };
 
   self.findSubscribers = function findSubscribers(){
+    self.resetInfo();
+    self.commonSubscribers = new Array();
 
     loadSubscribers(0);
 
     function loadSubscribers(index){ //takes public index in search publics array
       if(self.publicsForSearch[index] === undefined){ //Get common subscribers and exit if all publics have been searched
         self.commonSubscribers = self.getCommonSubscribers();
+        self.nowDownloading = -1; //Сбрасываем счетчик загружаемого паблоса для индикаторов загрузки
       }
       else if(self.publicsForSearch[index].subscribers !== undefined){ //Go to the next public if we already have this public's subscribers
         loadSubscribers(++index);
@@ -125,6 +179,7 @@ app.controller('friendsAppCtrl', ['$scope', 'vkDataExchange', '$q', '$http', fun
           });
       }
       else{ //or load subscribers from VK
+        self.nowDownloading = index;
         self.publicsForSearch[index].subscribers = {loaded: 0, total: 0, items: new Array(), totalLoad: $q.defer()};
         loadNext1000Func(index, 0);
         self.publicsForSearch[index].subscribers.totalLoad.promise.then(function(){ //When all subscribers of this public are downloaded
@@ -222,3 +277,17 @@ app.filter('undefinedPlaceFilter', function(){
     return outArray;
   };
 });
+
+app.directive('selectOnClick', ['$window', function ($window) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            element.on('click', function () {
+                if (!$window.getSelection().toString()) {
+                    // Required for mobile Safari
+                    this.setSelectionRange(0, this.value.length)
+                }
+            });
+        }
+    };
+}]);

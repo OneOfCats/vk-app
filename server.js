@@ -38,17 +38,23 @@ function succesfullConnect(){
 	console.log('Created server');
 
 	app.get('/publics/:publicId/updated', function(req, res){
+		var pool = db.get().createPool();
 		console.log('Getting update time 1');
-		db.get().pool.query('SELECT update_time FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = \'' + db.get().db_name + '\' AND table_name = \'subscribers_' + req.params.publicId + '\'', function(err, result){
-			if(err) return res.end(err);
+		pool.query('SELECT update_time FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = \'' + db.get().db_name + '\' AND table_name = \'subscribers_' + req.params.publicId + '\'', function(err, result){
+			if(err){
+				pool.end();
+				return res.end(err.toString());
+			}
 			console.log('Getting update time 2');
 			if(result.length == 0){ //If public not found
 				res.writeHead(204, {'Content-Type' : 'x-text/plain'});
+				pool.end();
 				return res.end();
 			}
 			if(result[0].update_time == null){ //If public hasn't been updated yet
-				db.get().pool.query('SELECT create_time FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = \'' + db.get().db_name + '\' AND table_name = \'subscribers_' + req.params.publicId + '\'', function(err, result){
-					if(err) res.end(err);
+				pool.query('SELECT create_time FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = \'' + db.get().db_name + '\' AND table_name = \'subscribers_' + req.params.publicId + '\'', function(err, result){
+					if(err) res.end(err.toString());
+					pool.end();
 					if(result.length == 0){ //If public not found
 						res.writeHead(204, {'Content-Type' : 'x-text/plain'});
 						return res.end();
@@ -64,6 +70,7 @@ function succesfullConnect(){
 					}
 				});
 			}else{ //If public has update date
+				pool.end();
 				res.writeHead(200, {'Content-Type' : 'x-text/plain'});
 				res.write(result[0].update_time.toString());
 				return res.end();
@@ -72,11 +79,13 @@ function succesfullConnect(){
 	});
 
 	app.get('/publics/:publicId/exists', function(req, res){
-		db.get().pool.query('SELECT 1 FROM subscribers_' + req.params.publicId + ' LIMIT 1', function(err, result){
+		var pool = db.get().createPool();
+		pool.query('SELECT 1 FROM subscribers_' + req.params.publicId + ' LIMIT 1', function(err, result){
+			pool.end();
 			if(err){
 				console.log('Public ' + req.params.publicId + ' not found');
 				res.writeHead(204, {'Content-Type' : 'x-text/plain'});
-				return res.end();
+				return res.end(err.toString());
 			}
 			console.log('Public ' + req.params.publicId + ' found');
 			res.writeHead(200, {'Content-Type' : 'x-text/plain'});
@@ -85,7 +94,9 @@ function succesfullConnect(){
 	});
 
 	app.get('/publics/:publicId/subscribers', function(req, res){
-		db.get().pool.query('SELECT * FROM subscribers_' + req.params.publicId + ' ORDER BY id', function(err, result){
+		var pool = db.get().createPool();
+		pool.query('SELECT * FROM subscribers_' + req.params.publicId + ' ORDER BY id', function(err, result){
+			pool.end();
 			if(err) return res.end(err.toString());
 			if(result.length == 0){ //If public not found
 				console.log('Public ' + req.params.publicId + ' not found');
@@ -101,61 +112,34 @@ function succesfullConnect(){
 	});
 
 	app.post('/publics/:publicId/subscribers', function(req, res){
+		var pool = db.get().createPool();
 
-		db.get().pool.query('SHOW TABLES LIKE \'subscribers_' + req.params.publicId + '\'', function(err, result){
-			if(err) return res.end(err);
+		pool.query('SHOW TABLES LIKE \'new_subscribers_' + req.params.publicId + '\'', function(err, result){
+			if(err){
+				pool.end();
+				return res.end(err.toString());
+			}
+			if(result.length > 0){
+				pool.end();
+				return res.end();
+			}
 			res.end();
 
-			db.get().pool.query('CREATE TABLE new_subscribers_' + req.params.publicId + ' (id INT PRIMARY KEY, first_name TEXT, last_name TEXT, sex INT, city TEXT, country TEXT, photo_200 TEXT)', function(err){
+			pool.query('CREATE TABLE new_subscribers_' + req.params.publicId + ' (id INT PRIMARY KEY, first_name TEXT, last_name TEXT, sex INT, city TEXT, country TEXT, photo_100 TEXT)', function(err){
 				if(err){
+					pool.end();
 					console.log(err);
 					return err;
 				}
-				db.insertSubscribers(req.body.subscribers.items, 'subscribers_' + req.params.publicId, function(err){
+				console.log('Table for the new ' + req.params.publicId + ' created');
+				db.insertSubscribers(req.body.subscribers.items, 'subscribers_' + req.params.publicId, pool, function(err){
+					pool.end();
 					if(err){
 						console.log(err);
 						return err;
 					}
 				});
 			});
-
-			/*
-			if(result.length == 0){
-				console.log('No table "subscribers_' + req.params.publicId + '". Creating table');
-				db.get().pool.query('CREATE TABLE subscribers_' + req.params.publicId + ' (id INT PRIMARY KEY, first_name TEXT, last_name TEXT, sex INT, city TEXT, country TEXT, photo_200 TEXT)', function(err, result){
-					if(err){
-						console.log(err);
-						return res.end(err.toString());
-					}
-					db.insertSubscribers(req.body.subscribers.items, 'subscribers_' + req.params.publicId, function(err){
-						if(err){
-							console.log(err);
-							return res.end(err.toString());
-						}
-						res.end();
-					});
-				});
-			}else{
-				console.log('Table "subscribers_' + req.params.publicId + '" exists');
-
-
-				db.get().pool.query('DROP TABLE subscribers_' + req.params.publicId, function(err){
-					if(err){
-						console.log(err);
-						return res.end(err.toString());
-					}
-					
-				});
-			}
-			*/
 		});
-
-		function insertData(data, publicId, done){
-			var subscribers = {};
-			subscribers.tables = {};
-			subscribers.tables['subscribers_' + publicId] = data;
-			db.fixtures(subscribers, done);
-		}
 	});
-
 }
